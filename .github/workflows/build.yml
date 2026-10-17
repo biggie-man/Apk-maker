@@ -590,4 +590,4 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: RBXCode-debug-apk
-          path: project/app/build/outputs/apk/debug/app-debug-v1.1.apk
+          path: project/app/build/outputs/apk/debug/app-debug.apk
