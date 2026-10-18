@@ -1,145 +1,74 @@
-name: Build APK
+name: Lua Editor & Auto-Injecter
 
 on:
   push:
- workflow_dispatch:
+ workflow_dispatch: # Allow manual trigger
 
 jobs:
-  build:
+  dev-build:
     runs-on: ubuntu-latest
-    steps:
-    # Step 1: Unpack the project (App/Source code)
-    - name: Unpack project
+   steps:
+
+    # 1. Set up the container with Lua, Android, and Node tools
+    - name: Checkout Code
+  uses: actions/checkout@v4
+
+    - name: Set up Docker
+   uses: docker-practice/actions-setup-docker@master
+
+    - name: Build Custom Image
   run: |
-    mkdir project && cd project
-    base64 -d <<'PAYLOAD' | tar xz
-    H4sIAAAAAAAAA+xc63PbtrLPZ/8VGH9p0tOrRPKrt/ecMyPLlqMeO/aRZCfpdKYDkZCEmiRYkLSt
-    dPq/398uQIqklFdPkjt3Gs3UXLwWi93FPgCknaePPvvvGX5HBwf8xa/9Zbh70DvcPzro9rj+6Ki7
-    90gcfH7SHj0qslxaIR5ZY/J39Xtf+//TX+fprNBR2FlYGUaqc5tnn34OEvDh/v5b5d/rHrL89/YP
-    9ve6qO/2jo56j8SzT0/K5u8vLv80KhY6ycTvOwI/HT7eDUzckUlojQ47Mk0jHchcm2T3ibhTNgMk
-    dr/vHHX2dgW1rsRcRpmqRhu76Pyq8pmVwNq5NXmkkxJdHUWv86zT6zZx/LHzf82Nv96v8zRTea6T
-    Rfb5TMD79v9+b7+1//cO9va/7v8v8XP7/0ImcqFileTid2FVajKdG6sV7IJYGLOI1OMn/yNieaeS
-    ATpZGVHZKcwVY7gyNqda8Yf4YydUqUpClQSrscpMVJD9qE/B1qI+zYUJVQeK+Hjcrhz2R+e/XL74
-    5Wp8+ePpYPrL+PTqcvJkA8E76AQ9f+yQ9K6s+VUFeSeRsRL/ELvj41cDTLG7o5MgKkL1ePcHWKPd
-    J38pK9R5ijV/5hjwo+O/7rP9o6/x3xf5Ofl/3hjwffb/6OiwJf+9g8Ov9v+L/D4i/vvAGA/WdscX
-    PFYyuFkqA7a6hF49yDiFptnZQ8AWmHqhIdWRmoS36LZ3sMOVoZrLIsoHJpnrhUdHvxpho/CdaOkX
-    68Sh7R1WdZD6QuXVbGW1D1DJMaDhsF3/wvuObmffof9jp078ZUoUZTVCM1PYQA3QDGJnOtL5CuN/
-    lHfyxmHs3JyOJyN4uO5Ri7aPGOSpcKLYJOLXu3jKKJn0o5Jyirfd/s9s8Bl9wIfa/3X810Xhq/3/
-    Er+1/GPs5s+jBB8v/17v2dFX+X+JX0v+v8LGfHIl+Hj573X3nn2V/5f4bZM/nNkn1YE/If+jZ4df
-    5f8lfm+Tv4+lPokefLz8D/b2u1/fI+4b/s+fL2fFr98K+ff3n+vmXj4fzMzf3zq+dW2p7Jy/2LcT
-    Rv98+fHp08vXuo4Pj+3Ov6tf3fP3bb5rKP/nKycv2i0VH8/fXz6dfLT1+uOD4/tzr+q9398/2tt+m
-    hy/9ytJN/vPnF6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54c
-    jPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2l
-    vR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4f
-    zMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b
-    5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lv
-    R/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzeP
-    r68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lv
-    R/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI
-    +5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ff
-    H58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fX
-    x6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqg
-    v+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv
-    3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/b
-    X2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lv
-    R/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vm
-    Xqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr
-    8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fXx6NHy8+uO
-    D4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv+X98+XDh8
-    /N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9sHPk98/fX
-    x6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjPz53ljqgv
-    +X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8
-    /fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/89f9s
-    HPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68tP7rL54cjP
-    z53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+fmXqzePr68t
-    P7rL54cjPz53ljqgv+X98+XDh8/N57YO+ffH58+fPnr8zM3/b5a1vR/8/bX2lvR/8/fb2lvR/8/
-    fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2lvR/8/fb2
-    lvR/89f9sHPk98/fXx6NHy8+uOD4979urfI+5r/8vmXqzv4fzMvf9H+2fv3k0X3+
-   PAYLOAD
+    # Create Dockerfile
+    echo "FROM ubuntu:22.04" > Dockerfile
+    echo "RUN apt-get update && apt-get install -y nodejs npm git android-sdk-emulator adb greedproof-editor neovim curl" >> Dockerfile
+    echo "RUN npm i -g @lexical/lru-cli" >> Dockerfile
+    echo "EXPOSE 3000" >> Dockerfile
+    echo "CMD [\"bash\"]" >> Dockerfile
+  
+    docker build -t luabuilder.
 
-    # Step 2: Install dependencies
-    - name: Install ADB (Android Debug Bridge)
-   uses: native-actions/setup-adb@v1
-
-    # Step 3: Connect to device
-    - name: Connect to Phone
-  run: adb connect 127.0.0.1:5037
-    # Note: If you have a real USB cable, plug it in and run `adb devices` to see your device ID.
-    # Then replace 127.0.0.1 with your device's IP (if using Wi-Fi).
-    # e.g. run: adb connect 192.168.1.105:5555
-
-    # Step 4: Inject Code into Roblox
-    - name: Inject Lua Code
+    - name: Start Container
   run: |
-    # Define your code injection script
-    # This sends the input to the in-game console (~) and hits enter
-    echo "Injecting code..." >> logs.txt
+    docker run -itd -v $(pwd):/workspace --name luabuild luabuilder bash
+    docker exec luabuild bash -c "cd /workspace && mkdir -p logs"
 
-    # Replace 'workspace.Baseplate' with whatever you want to inject into
-    # Example: Change the skycolor to red
-   LUA_CODE='game:GetService("Lighting").SkyColor=Color3.fromRGB(255,0,0)'
+    # 2. Install Project Dependencies
+    - name: Install dependencies
+  run: docker exec luabuild bash -c "cd /workspace && npm install -g @vscode/vscode-languageserver bin-wrapper" # simplified install
 
-    # Send keys to open console (~), type the code, and press enter (ENTER, kp_enter)
-    adb shell input keyevent 66  # Open URL/Search bar/RPC (check if it opens console)
-    # Alternative for Experiments enabled keyboards (common in Roblox app):
-    adb shell input text "~"
+    # 3. Start the Roblox Injection Loop
+    - name: Run Development Server & Injector
+   run: docker exec luabuild bash -c "
+    npm install -g live-server
+    mkdir -p app
+    echo 'game:GetService(\"Camera\").CurrentCamera.FieldOfView=120' > app/index.html
+    echo '<style>body{background:#111;color:#0f0;font-family:monospace;}' > app/index.html
+    echo '</style>' >> app/index.html
+    echo '<script src=\"script.lua\"></script>' >> app/index.html
+    echo '-- My Lua Script\nwait(2)\nworkspace.Baseplate.CFrame=CFrame.new(0,10,0)' > app/script.lua
+    echo 'STARTING SERVER...' >> logs.txt
+    # Start server in background, then loop injection script
+   ./node_modules/.bin/live-server app &
+    PID=$!
+    while true; do
+    echo \"[\$(date)] Sending ADB command...\" >> logs.txt
+    # Injection Logic using FireTouchInterest
+    CODE='firetouchinterest(game.Workspace.CurrentCamera,fire)?'
+    echo $(adb shell input keyevent 66) >> logs.txt
     sleep 1
-    adb shell input keyevent 66  # Enter
+    echo $(adb shell input text \"\$CODE\") >> logs.txt
     sleep 1
-    adb shell input text "$LUA_CODE"
-    sleep 1
-    adb shell input keyevent 66  # Enter
+    echo $(adb shell input keyevent 66) >> logs.txt
+    sleep 2
+   done &
+    echo \"Server PID: \$PID\" >> logs.txt
+  "
 
-    echo "--- Console Output Start ---" >> logs.txt
-    adb shell dumpsys activity top | grep "ACTIVITY" >> logs.txt
-    echo "--- Console Output End ---" >> logs.txt
+    # 4. Package the APK
+    - name: Package APK
+   run: docker exec luabuild bash -c "
+    cd /workspace/app
+    npx @capacitor/cli add android
+    npx @capacitor/cli build android
+    ls android/app/build/outputs/apk/debug/app-debug.apk
+   "
