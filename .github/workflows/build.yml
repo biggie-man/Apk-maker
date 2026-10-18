@@ -1,74 +1,36 @@
-name: Lua Editor & Auto-Injecter
+name: Build APK
 
 on:
   push:
- workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
-  dev-build:
+  build:
     runs-on: ubuntu-latest
-   steps:
+    steps:
+      - uses: actions/checkout@v4
 
-    # 1. Set up the container with Lua, Android, and Node tools
-    - name: Checkout Code
-  uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Set up Docker
-   uses: docker-practice/actions-setup-docker@master
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
 
-    - name: Build Custom Image
-  run: |
-    # Create Dockerfile
-    echo "FROM ubuntu:22.04" > Dockerfile
-    echo "RUN apt-get update && apt-get install -y nodejs npm git android-sdk-emulator adb greedproof-editor neovim curl" >> Dockerfile
-    echo "RUN npm i -g @lexical/lru-cli" >> Dockerfile
-    echo "EXPOSE 3000" >> Dockerfile
-    echo "CMD [\"bash\"]" >> Dockerfile
-  
-    docker build -t luabuilder.
+      - name: Set up Capacitor
+        run: |
+          npm init -y
+          npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          npx cap init MyApp com.example.myapp --web-dir=www
+          npx cap add android
+          npx cap sync android
 
-    - name: Start Container
-  run: |
-    docker run -itd -v $(pwd):/workspace --name luabuild luabuilder bash
-    docker exec luabuild bash -c "cd /workspace && mkdir -p logs"
+      - name: Build debug APK
+        run: cd android && ./gradlew assembleDebug
 
-    # 2. Install Project Dependencies
-    - name: Install dependencies
-  run: docker exec luabuild bash -c "cd /workspace && npm install -g @vscode/vscode-languageserver bin-wrapper" # simplified install
-
-    # 3. Start the Roblox Injection Loop
-    - name: Run Development Server & Injector
-   run: docker exec luabuild bash -c "
-    npm install -g live-server
-    mkdir -p app
-    echo 'game:GetService(\"Camera\").CurrentCamera.FieldOfView=120' > app/index.html
-    echo '<style>body{background:#111;color:#0f0;font-family:monospace;}' > app/index.html
-    echo '</style>' >> app/index.html
-    echo '<script src=\"script.lua\"></script>' >> app/index.html
-    echo '-- My Lua Script\nwait(2)\nworkspace.Baseplate.CFrame=CFrame.new(0,10,0)' > app/script.lua
-    echo 'STARTING SERVER...' >> logs.txt
-    # Start server in background, then loop injection script
-   ./node_modules/.bin/live-server app &
-    PID=$!
-    while true; do
-    echo \"[\$(date)] Sending ADB command...\" >> logs.txt
-    # Injection Logic using FireTouchInterest
-    CODE='firetouchinterest(game.Workspace.CurrentCamera,fire)?'
-    echo $(adb shell input keyevent 66) >> logs.txt
-    sleep 1
-    echo $(adb shell input text \"\$CODE\") >> logs.txt
-    sleep 1
-    echo $(adb shell input keyevent 66) >> logs.txt
-    sleep 2
-   done &
-    echo \"Server PID: \$PID\" >> logs.txt
-  "
-
-    # 4. Package the APK
-    - name: Package APK
-   run: docker exec luabuild bash -c "
-    cd /workspace/app
-    npx @capacitor/cli add android
-    npx @capacitor/cli build android
-    ls android/app/build/outputs/apk/debug/app-debug.apk
-   "
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
